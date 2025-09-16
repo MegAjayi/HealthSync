@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HealthSync Dashboard</title>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body { margin: 0; font-family: Arial, sans-serif; background: #f9fdfc; color: #333; }
+    header { background: #009688; color: white; padding: 15px; text-align: center; }
+    .lang-switch { margin-top: 8px; }
+    nav { display: flex; justify-content: center; background: #80cbc4; padding: 10px; flex-wrap: wrap; }
+    nav button { background: none; border: none; margin: 5px 10px; font-size: 16px; cursor: pointer; color: white; }
+    nav button:hover { text-decoration: underline; }
+    #profile { margin: 15px; font-weight: bold; }
+    .content { padding: 20px; display: none; }
+    .active { display: block; }
+    .card { background: white; padding: 15px; margin: 10px 0; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+    .card h3 { margin-top: 0; }
+    canvas { max-width: 100%; }
+    footer { text-align: center; padding: 15px; background: #f1f1f1; margin-top: 30px; }
+    @media (max-width: 600px) { nav { flex-direction: column; } nav button { margin: 5px 0; } }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>HealthSync</h1>
+    <div class="lang-switch">
+      🌐 Language:
+      <select id="language">
+        <option value="en">English</option>
+        <option value="yo">Yoruba</option>
+        <option value="ig">Igbo</option>
+        <option value="ha">Hausa</option>
+      </select>
+    </div>
+  </header>
+
+  <div id="profile"></div>
+
+  <nav>
+    <button onclick="showPage('dashboard')"><span class="material-icons">dashboard</span> Dashboard</button>
+    <button onclick="showPage('appointments')" class="role-caregiver"><span class="material-icons">event</span> Appointments</button>
+    <button onclick="showPage('reminders')" class="role-elderly role-caregiver"><span class="material-icons">alarm</span> Reminders</button>
+    <button onclick="showPage('pregnancy')" class="role-pregnant"><span class="material-icons">pregnant_woman</span> Pregnancy</button>
+    <button onclick="showPage('tips')" class="role-elderly role-pregnant"><span class="material-icons">health_and_safety</span> Health Tips</button>
+  </nav>
+
+  <!-- Dashboard -->
+  <div id="dashboard" class="content active">
+    <!-- Elderly Dashboard -->
+    <div class="card role-elderly">
+      <h3>🧓 Elderly Health Summary</h3>
+      <p>🏥 Last Clinic Visit: Sept 1, 2025 — Dr. Musa</p>
+      <canvas id="bpChart"></canvas>
+      <canvas id="sugarChart"></canvas>
+    </div>
+
+    <!-- Pregnant Dashboard -->
+    <div class="card role-pregnant">
+      <h3>🤰 Pregnancy Health Summary</h3>
+      <p>📅 Last Antenatal: Aug 28, 2025</p>
+      <p>🎯 Expected Due Date: Dec 30, 2025</p>
+      <canvas id="weightChart"></canvas>
+    </div>
+
+    <!-- Caregiver Dashboard -->
+    <div class="card role-caregiver">
+      <h3>👩‍⚕ Caregiver Dashboard</h3>
+      <canvas id="patientsChart"></canvas>
+    </div>
+  </div>
+
+  <!-- Other Pages -->
+  <div id="appointments" class="content role-caregiver">
+    <div class="card">
+      <h3>Upcoming Appointments</h3>
+      <p>Mrs. Grace – Sept 12, 2025, 10:00 AM</p>
+    </div>
+  </div>
+
+  <div id="reminders" class="content role-elderly role-caregiver">
+    <div class="card">
+      <h3>Medication Reminder</h3>
+      <p>💊 Take blood pressure pill at 9 AM</p>
+    </div>
+  </div>
+
+  <div id="pregnancy" class="content role-pregnant">
+    <div class="card">
+      <h3>Pregnancy Tracker</h3>
+      <p>🌽 Week 24: Baby is the size of a corn!</p>
+    </div>
+  </div>
+
+  <div id="tips" class="content role-elderly role-pregnant">
+    <div class="card">
+      <h3>Daily Health Tip</h3>
+      <p>🚶 Take a 20-minute walk daily to improve circulation.</p>
+    </div>
+  </div>
+
+  <footer>
+    <span>HealthSync © 2025</span>
+  </footer>
+
+  <script>
+    // Navigation
+    function showPage(pageId) {
+      document.querySelectorAll('.content').forEach(p => p.classList.remove('active'));
+      document.getElementById(pageId).classList.add('active');
+    }
+
+    // Role filtering
+    window.onload = function() {
+      const user = localStorage.getItem("healthsyncUser") || "Blessing";
+      const role = localStorage.getItem("healthsyncRole") || "elderly";
+
+      document.getElementById("profile").textContent = `Welcome, ${user} (${role})`;
+
+      document.querySelectorAll("[class*='role-']").forEach(el => {
+        if (!el.classList.contains('role-' + role.toLowerCase())) {
+          el.style.display = "none";
+        }
+      });
+
+      // Charts
+      if (role.toLowerCase() === "elderly") {
+        new Chart(document.getElementById("bpChart"), {
+          type: "line",
+          data: {
+            labels: ["Sept 1", "Sept 3", "Sept 5", "Sept 7"],
+            datasets: [{ label: "Blood Pressure (mmHg)", data: [135, 132, 130, 128], borderColor: "#009688", fill: false }]
+          }
+        });
+
+        new Chart(document.getElementById("sugarChart"), {
+          type: "bar",
+          data: {
+            labels: ["Sept 1", "Sept 3", "Sept 5", "Sept 7"],
+            datasets: [{ label: "Blood Sugar (mg/dL)", data: [100, 98, 95, 97], backgroundColor: "#80cbc4" }]
+          }
+        });
+      }
+
+      if (role.toLowerCase() === "pregnant") {
+        new Chart(document.getElementById("weightChart"), {
+          type: "line",
+          data: {
+            labels: ["Week 20", "Week 21", "Week 22", "Week 23", "Week 24"],
+            datasets: [{ label: "Weight (kg)", data: [66, 66.5, 67, 67.8, 68], borderColor: "#ff4081", fill: false }]
+          }
+        });
+      }
+
+      if (role.toLowerCase() === "caregiver") {
+        new Chart(document.getElementById("patientsChart"), {
+          type: "pie",
+          data: {
+            labels: ["Active Patients", "With Reminders", "Upcoming Appointments"],
+            datasets: [{
+              data: [5, 3, 2],
+              backgroundColor: ["#009688", "#80cbc4", "#b2dfdb"]
+            }]
+          }
+        });
+      }
+    };
+  </script>
+</body>
+</html>
